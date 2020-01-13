@@ -1,0 +1,79 @@
+{
+    "tempat":
+              [
+                {
+                    "nama": "epicentrum",
+					"x": 70,
+					"y": 170,
+					"links": [
+                        4,
+                        8
+					]
+                },
+                {
+                    "nama": "UBG",
+					"x": 290,
+					"y": 60,
+					"links": [
+						4,
+						2
+					]
+				},
+				{
+                    "nama": "taman budaya",
+					"x": 410,
+					"y": 65,
+					"links": [
+						3,
+						4
+					]
+				},
+				{
+                    "nama": "Taman sangkareang",
+					"x": 700,
+					"y": 70,
+					"links": [
+						7
+					]
+				},
+				{
+                    "nama": "kos ku",
+					"x": 240,
+					"y": 180,
+					"links": [
+						6,
+						5
+					]
+				},
+				{
+                    "nama": "madrid",
+					"x": 210,
+					"y": 340,
+					"links":[
+                        6,
+                        5
+					]
+				},
+				{
+                    "nama": "old traford",
+					"x": 510,
+					"y": 250,
+					"links": [
+					]
+				},
+				{
+                    "nama": "malomba",
+					"x": 680,
+					"y": 275,
+					"links": [
+					]
+                },
+                {
+                    "nama": "mako",
+					"x": 780,
+					"y": 375,
+					"links": [
+					]
+                }
+              ]
+}

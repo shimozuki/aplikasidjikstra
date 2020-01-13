@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>
+		project
+	</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+	<!-- Popper JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+	<style>
+		.dd {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+	</style>
+</head>
+<center>
+	<nav class="navbar navbar-light bg-primary">
+		<a class="navbar-brand" href="#"></a>
+<a class="text-light"><marquee width="500" height="40"><h2><b>GOOGLE MAP</b></h2></marquee></a>
+<a class="navbar-brand" href="#"></a>
+</nav>
+</center>
+
+<body>
+	<div class="row" style="margin-left:2%; margin-right:2%;">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-body" style="height: 50%;">
+					<div class="row">
+						<div class="col-md-12">
+							<canvas id="map" width="850px" height="500px" style="border:1px solid #000000;"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr>
+	<div class="row" style="margin-left:2%; margin-right:2%;">
+		<div class="col-md-6">
+			<div class="card" style="height: 95%">
+				<div class="card-header">
+					<center>Form Load Data</center>
+				</div>
+				<div class="card-body" style="height: 30%; padding-top: 10%;">
+					<center><button type="button" class="btn btn-primary" onclick='loadJSON()'>Load Data</button></center>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card" style="height: 95%">
+				<div class="card-header">
+					<center>Form Perhitungan Jarak Terdekat</center>
+				</div>
+				<form>
+					<div class="card-body" style="height: 30%;">
+						<div class="form-group">
+							<label for="sel1">Asal:</label>
+							<select class="form-control" name="asal" id="tempat" onchange="run()">
+								<option>Pilih Tempat Asal</option>
+							</select>
+						</div>
+						<br>
+						<div class="form-group">
+							<label for="sel1">Tujuan:</label>
+							<select class="form-control" name="tujuan" id="tempat2" onchange="run2()">
+								<option>Pilih Tempat Tujuan</option>
+							</select>
+						</div>
+
+						<center><input type="button" class="btn btn-primary" onclick="djikstra()" value="Hitung Jarak Terdekat"></center>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="table-responsive col-md-12">
+		<table class="table table-bordered bg-primar">
+			<thead>
+			<tr>
+			<th>Asal</th>
+			<th>Tujuan</th>
+			<th>Jalur</th>
+			<th>Jarak</th>
+			<th>Hitungan</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td id="asl"></td>
+				<td id="tjn"></td>
+				<td id="jlr"></td>
+				<td id="jrk"></td>
+				<td id="htn"></td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+
+<script>
+	//Populate Data Tempat in Select
+	$.getJSON("datalokasi.json", function (json2) {
+		console.log(json2); // this will show the info it in firebug console
+		var jdata2 = json2;
+		var myArray = new Array("1", "2", "3", "4", "5");
+		console.log(jdata2.tempat[1].nama);
+		// Get dropdown element from DOM
+		var dropdown = document.getElementById("tempat");
+
+		// Loop through the array
+		for (var i = 0; i < jdata2.tempat.length; ++i) {
+			// Append the element to the end of Array list
+
+			dropdown[dropdown.length] = new Option(jdata2.tempat[i].nama, i);
+		}
+
+		var dropdown = document.getElementById("tempat2");
+
+		// Loop through the array
+		for (var i = 0; i < jdata2.tempat.length; ++i) {
+			// Append the element to the end of Array list
+
+			dropdown[dropdown.length] = new Option(jdata2.tempat[i].nama, i);
+		}
+	});
+
+	//Load local JSON file
+	function loadJSON() {
+		$.getJSON("datalokasi.json", function (json) {
+			console.log(json); // this will show the info it in firebug console
+			var jdata = json;
+			var canvas = document.getElementById("map");
+
+			//Pembuatan Garis setiap titik
+			for (var i = 0; i < jdata.tempat.length; i++) {
+				var ctx = canvas.getContext("2d");
+
+				if (jdata.tempat[i].links.length > 0) {
+					var tujuan;
+					for (var j = 0; j < jdata.tempat[i].links.length; j++) {
+						tujuan = jdata.tempat[i].links[j];
+						console.log("Tujuan: " + tujuan);
+						ctx.lineWidth = 2;
+						ctx.moveTo(jdata.tempat[i].x, jdata.tempat[i].y);
+						ctx.lineTo(jdata.tempat[tujuan].x, jdata.tempat[tujuan].y);
+						ctx.strokeStyle = "BLUE";
+						ctx.stroke();
+					}
+				}
+
+			}
+
+			//Titik 
+			for (var i = 0; i < jdata.tempat.length; i++) {
+				ctx.beginPath();
+				ctx.arc(jdata.tempat[i].x, jdata.tempat[i].y, 10, 0, 2 * Math.PI);
+				ctx.fillStyle = "#bbff00";
+				ctx.fill();
+				ctx.stroke();
+				ctx.font = "10px Calibri";
+
+				ctx.fillText("1", jdata.tempat[i].x - (10 / 2), jdata.tempat[i].y + (10 / 2));
+				ctx.font = "20px Arial";
+
+				ctx.fillText(jdata.tempat[i].nama, jdata.tempat[i].x, jdata.tempat[i].y + (10 / 2) + 15);
+				console.log(jdata.tempat[i].links.length);
+			}
+		});
+	}
+
+	var select1;
+	var select2;
+
+	function run() {
+		select1 = document.getElementById("tempat").value;
+	}
+
+	function run2() {
+		select2 = document.getElementById("tempat2").value;
+	}
+
+
+	function djikstra() {
+		$.getJSON("datalokasi.json", function (json) {
+			console.log(json); // menampilkan data
+			var jdata = json;
+			var canvas = document.getElementById("map");
+			var ctx = canvas.getContext("2d");
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			for (var i = 0; i < jdata.tempat.length; i++) {
+				ctx.beginPath();
+				ctx.arc(jdata.tempat[i].x, jdata.tempat[i].y, 10, 0, 2 * Math.PI);
+				ctx.fillStyle = "#00a2ff";
+				ctx.fill();
+				ctx.stroke();
+				ctx.font = "10px Calibri";
+
+				ctx.fillText("1", jdata.tempat[i].x - (10 / 2), jdata.tempat[i].y + (10 / 2));
+				ctx.font = "12px Tahoma";
+
+				ctx.fillText(jdata.tempat[i].nama, jdata.tempat[i].x, jdata.tempat[i].y + (10 / 2) + 15);
+				console.log(jdata.tempat[i].links.length);
+
+				if (jdata.tempat[i].links.length > 0) {
+					var tujuan;
+					for (var j = 0; j < jdata.tempat[i].links.length; j++) {
+						tujuan = jdata.tempat[i].links[j];
+						console.log("Tujuan: " + tujuan);
+						ctx.lineWidth = 2;
+						ctx.moveTo(jdata.tempat[i].x, jdata.tempat[i].y);
+						ctx.lineTo(jdata.tempat[tujuan].x, jdata.tempat[tujuan].y);
+						ctx.strokeStyle = "BLUE";
+						ctx.stroke();
+					}
+				}
+
+			}
+
+			const rows = jdata.tempat.length;
+			const cols = jdata.tempat.length;
+
+			const jarak = Array.from({
+					length: rows
+				}, () =>
+				Array.from({
+					length: cols
+				}, () => false)
+			);
+			for (var i = 0; i < jdata.tempat.length; i++) {
+				for (var j = 0; j < jdata.tempat.length; j++) {
+					if (i == j) {
+						jarak[i][j] = 0;
+					} else if (jdata.tempat[i].links.includes(j)) {
+						jarak[i][j] = Math.abs(Math.sqrt(Math.pow((jdata.tempat[i].x - jdata.tempat[j].x), 2) + Math.pow((jdata.tempat[
+							i].y - jdata.tempat[j].y), 2)));
+					} else if (jdata.tempat[j].links.includes(i)) {
+						jarak[i][j] = Math.abs(Math.sqrt(Math.pow((jdata.tempat[i].x - jdata.tempat[j].x), 2) + Math.pow((jdata.tempat[
+							i].y - jdata.tempat[j].y), 2)));
+					} else {
+						jarak[i][j] = Infinity;
+					}
+					//console.log("Jarak[" + i + "][" + j + "]: " + jarak[i][j] + "\n");
+				}
+			}
+
+			//console.log("jumlah data jarak:" + jarak.length);
+
+			var Awal = parseInt(select1);
+			var Akhir = parseInt(select2);
+			JumlahVerteks = jarak.length;
+			var Posisi = new Array(JumlahVerteks);
+			var Kunjungan = new Array(JumlahVerteks);
+			var Sebelum = new Array(JumlahVerteks);
+			var TakTerdefinisi = -1;
+			var i;
+			var Verteks;
+			var Berhenti;
+
+
+			//inisialisasi array;
+			for (i = 0; i < JumlahVerteks; i++) {
+				Posisi[i] = Infinity;
+				Sebelum[i] = TakTerdefinisi; //tak terdefinisi = -1;
+				Kunjungan[i] = false;
+
+			}
+			//console.log("i for pertama: "+i);
+
+			Posisi[Awal] = 0;
+
+			for (Verteks = 0; Verteks < JumlahVerteks; Verteks++) {
+				var JarakTerpendek = Infinity;
+				Berhenti = -1;
+				for (i = 0; i < JumlahVerteks; i++) {
+					if (!Kunjungan[i]) {
+						if (Posisi[i] <= JarakTerpendek) {
+							JarakTerpendek = Posisi[i];
+							Berhenti = i;
+						}
+					}
+				}
+				//console.log("i for kedua: "+i);
+				Kunjungan[Berhenti] = true;
+				for (i = 0; i < JumlahVerteks; i++) {
+					if (!Kunjungan[i]) {
+						var w = jarak[Berhenti][i];
+						if (Posisi[Berhenti] + w < Posisi[i]) {
+							Posisi[i] = Posisi[Berhenti] + w;
+							Sebelum[i] = Berhenti;
+						}
+					}
+				}
+				//console.log("i for ketiga: "+i);
+
+			}
+
+			i = Akhir;
+			//console.log("i terakhir: "+i);
+			if (Posisi[i] < Infinity) {
+				var Lintasan = jdata.tempat[i].nama;
+				var Verteks = i;
+				var Asal = i;
+				var total = 0;
+				while (Verteks >= 0) {
+					p = Verteks = Sebelum[Verteks];
+					if (Verteks >= 0) {
+						Lintasan = jdata.tempat[Verteks].nama + '->' + Lintasan;
+						ctx.moveTo(jdata.tempat[Verteks].x, jdata.tempat[Verteks].y);
+						ctx.lineTo(jdata.tempat[Asal].x, jdata.tempat[Asal].y);
+						ctx.strokeStyle = "YELLOW";
+						ctx.stroke();
+						total += jarak[Asal][Verteks];
+						Asal = Verteks;
+
+					}
+				}
+
+				for (var i = 0; i < jdata.tempat.length; i++) {
+					ctx.beginPath();
+					ctx.arc(jdata.tempat[i].x, jdata.tempat[i].y, 10, 0, 2 * Math.PI);
+					ctx.fillStyle = "#00a2ff";
+					ctx.fill();
+					ctx.stroke();
+					ctx.font = "10px Calibri";
+
+					ctx.fillText("1", jdata.tempat[i].x - (10 / 2), jdata.tempat[i].y + (10 / 2));
+					ctx.font = "12px Tahoma";
+
+					ctx.fillText(jdata.tempat[i].nama, jdata.tempat[i].x, jdata.tempat[i].y + (10 / 2) + 15);
+					console.log(jdata.tempat[i].links.length);
+				}
+				document.getElementById("asl").innerHTML = jdata.tempat[select1].nama;
+				document.getElementById("tjn").innerHTML = jdata.tempat[select2].nama;
+				document.getElementById("jlr").innerHTML = Lintasan;
+				document.getElementById("jrk").innerHTML = total.toFixed(2);				
+
+			} else {
+				alert("Tidak ada Jalur")
+			}
+		});
+	}
+</script>
+</html>
